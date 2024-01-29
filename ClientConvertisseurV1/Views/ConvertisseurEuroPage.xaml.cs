@@ -19,6 +19,7 @@ using Windows.UI.Popups;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -35,9 +36,10 @@ namespace ClientConvertisseurV1.Views
         public double MontantEuro
         {
             get { return montantEuro; }
-            set {
+            set
+            {
                 montantEuro = value;
-                OnPropertyChanged(nameof(montantEuro));
+                this.OnPropertyChanged();
             }
         }
 
@@ -48,7 +50,7 @@ namespace ClientConvertisseurV1.Views
             set
             {
                 montantDevise = value;
-                OnPropertyChanged(nameof(montantDevise));
+                this.OnPropertyChanged();
             }
         }
 
@@ -58,9 +60,9 @@ namespace ClientConvertisseurV1.Views
         public ObservableCollection<Devise> Devises
         {
             get { return devises; }
-            set {
+            set
+            {
                 devises = value;
-                OnPropertyChanged(nameof(devises));
             }
         }
 
@@ -69,9 +71,10 @@ namespace ClientConvertisseurV1.Views
         public Devise SelectedDevise
         {
             get { return selectedDevise; }
-            set {
-                selectedDevise = value; 
-                OnPropertyChanged(nameof(selectedDevise));
+            set
+            {
+                selectedDevise = value;
+                this.OnPropertyChanged();
             }
         }
 
@@ -79,7 +82,10 @@ namespace ClientConvertisseurV1.Views
         public ConvertisseurEuroPage()
         {
             this.InitializeComponent();
+            Devises = new ObservableCollection<Devise>();
+
             this.DataContext = this;
+            //Devises.Add(new Devise(1, "Dollar", 1.5));
             GetDataOnLoadAsync();
         }
 
@@ -87,27 +93,26 @@ namespace ClientConvertisseurV1.Views
         {
             WSService service = new WSService("http://localhost:44356/api/");
             List<Devise> result = await service.GetDevisesAsync("devises");
-            if(result != null)
+            if (result != null)
             {
-                Devises = new ObservableCollection<Devise>(result);
-                cbDevise.ItemsSource = Devises;
-                cbDevise.DisplayMemberPath = "NomDevise";
+                foreach(Devise dev in result)
+                {
+                    Devises.Add(dev);
+                }
             }
         }
 
         private void btConvert_Click(object sender, RoutedEventArgs e)
         {
-            MontantDevise = MontantEuro * SelectedDevise.Taux;
+            MontantDevise = Math.Round(MontantEuro * SelectedDevise.Taux, 2);
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged(string name)
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+        public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(name));
-            }
+            // Raise the PropertyChanged event, passing the name of the property whose value has changed.
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
     }
 }
