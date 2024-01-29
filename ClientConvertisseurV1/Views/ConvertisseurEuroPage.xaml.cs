@@ -38,7 +38,7 @@ namespace ClientConvertisseurV1.Views
             get { return montantEuro; }
             set
             {
-                montantEuro = value;
+                montantEuro = Math.Round(value, 2);
                 this.OnPropertyChanged();
             }
         }
@@ -85,7 +85,6 @@ namespace ClientConvertisseurV1.Views
             Devises = new ObservableCollection<Devise>();
 
             this.DataContext = this;
-            //Devises.Add(new Devise(1, "Dollar", 1.5));
             GetDataOnLoadAsync();
         }
 
@@ -99,11 +98,25 @@ namespace ClientConvertisseurV1.Views
                 {
                     Devises.Add(dev);
                 }
+            } else
+            {
+                ShowErrorMessage("Erreur d'API",
+                    "Les données ne peuvent pas être récupérer de l'API, la liste des devises n'a pas pu être chargée");
             }
         }
 
         private void btConvert_Click(object sender, RoutedEventArgs e)
         {
+            if(SelectedDevise == null)
+            {
+                ShowErrorMessage("Erreur de devise", "Vous devez séléctionner une dévise pour effectuer la conversion");
+                return;
+            }
+            if(MontantEuro < 0)
+            {
+                ShowErrorMessage("Erreur de montant", "Le montant entré doit être strictement supérieur à 0");
+                return;
+            }
             MontantDevise = Math.Round(MontantEuro * SelectedDevise.Taux, 2);
         }
 
@@ -112,6 +125,22 @@ namespace ClientConvertisseurV1.Views
         {
             // Raise the PropertyChanged event, passing the name of the property whose value has changed.
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private async void ShowErrorMessage(string title, string message)
+        {
+
+            ContentDialog contentDialog = new ContentDialog
+            {
+                Title = title,
+                Content = message,
+                CloseButtonText = "Ok"
+            };
+
+            contentDialog.XamlRoot = this.Content.XamlRoot;
+
+
+            ContentDialogResult result = await contentDialog.ShowAsync();
         }
 
     }
