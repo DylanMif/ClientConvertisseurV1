@@ -23,12 +23,12 @@ namespace ClientConvertisseurV2.Views
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class ConvertisseurEuroPage : Page
+    public sealed partial class ConvertisseurDevise : Page
     {
-        public ConvertisseurEuroPage()
+        public ConvertisseurDevise()
         {
             this.InitializeComponent();
-            this.DataContext = App.Current.Services.GetService<ConvertisseurEuroViewModel>();
+            this.DataContext = App.Current.Services.GetService<ConvertisseurDeviseVM>();
         }
 
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -40,5 +40,4 @@ namespace ClientConvertisseurV2.Views
                 Frame.Navigate(typeof(ConvertisseurDevise));
         }
     }
-
 }
